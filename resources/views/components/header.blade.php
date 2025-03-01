@@ -102,22 +102,22 @@
                                                 <li>
                                                     <p> Продукты </p>
                                                 </li>
-                                                <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Dresses</a></li>
+                                                {{--<li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Dresses</a></li>
                                                 <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Shirts And Tops</a>
                                                 </li>
                                                 <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Jeans</a></li>
                                                 <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; T-Shirts</a></li>
-                                                <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Premium Wear</a></li>
+                                                <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Premium Wear</a></li>--}}
                                             </ul>
                                             <ul class="col-sm-6 col-md-3 list-unstyled ">
                                                 <li>
                                                     <p> Фрукты </p>
                                                 </li>
-                                                <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Flats</a></li>
+                                                {{--<li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Flats</a></li>
                                                 <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Heels</a></li>
                                                 <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Boots</a></li>
                                                 <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Casual Shoes</a></li>
-                                                <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Sports Shoes</a></li>
+                                                <li><a href="shop-women.html"><i class="fa fa-angle-right"></i> &nbsp; Sports Shoes</a></li>--}}
                                             </ul>
                                         </div>
                                     </div>
