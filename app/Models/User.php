@@ -7,8 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+
 class User extends Authenticatable
 {
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasVerifiedEmail();
+    }
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
