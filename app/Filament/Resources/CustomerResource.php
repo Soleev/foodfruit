@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -64,6 +65,7 @@ class CustomerResource extends Resource
                 //
             ])
             ->actions([
+                ViewAction::make(), // Добавляем кнопку "View"
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -85,6 +87,7 @@ class CustomerResource extends Resource
         return [
             'index' => Pages\ListCustomers::route('/'),
             'create' => Pages\CreateCustomer::route('/create'),
+            'view-contact' => Pages\ViewCustomerContact::route('/{record}/contact'),
             'edit' => Pages\EditCustomer::route('/{record}/edit'),
         ];
     }
