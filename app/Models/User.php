@@ -14,7 +14,7 @@ class User extends Authenticatable
 {
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasVerifiedEmail();
+        return str_ends_with($this->email, '@foodfruit.uz') && $this->hasVerifiedEmail();
     }
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
