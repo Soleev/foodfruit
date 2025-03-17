@@ -18,7 +18,7 @@ class Customer extends Model
         'district',
         'address',
         'location',
-        'phone',
+        'phone_number',
         'comment',
     ];
 }

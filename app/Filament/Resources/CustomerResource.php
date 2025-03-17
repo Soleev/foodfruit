@@ -28,10 +28,14 @@ class CustomerResource extends Resource
         return $form
             ->schema([
                 TextInput::make('seller_name')->label('Имя продавца')->required(),
-                TextInput::make('shop_name')->label('Название магазина')->required(),
-                Textarea::make('products')->label('Товары')->required(),
-                TextInput::make('district')->label('Район')->required(),
-                TextInput::make('address')->label('Адрес')->required(),
+                TextInput::make('phone_number')
+                    ->label('Номер телефона')
+                    ->tel()
+                    ->required(),
+                TextInput::make('shop_name')->label('Название магазина'),
+                Textarea::make('products')->label('Товары'),
+                TextInput::make('district')->label('Район'),
+                TextInput::make('address')->label('Адрес'),
                 TextInput::make('location')->label('Локация (ссылка)')->url(),
                 Textarea::make('comment')->label('Комментарий'),
             ]);
@@ -42,6 +46,10 @@ class CustomerResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('seller_name')->label('Имя продавца')->sortable()->searchable(),
+                TextColumn::make('phone_number')
+                    ->label('Номер телефона')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('shop_name')->label('Название магазина')->sortable()->searchable(),
                 TextColumn::make('products')->label('Товары')->limit(30),
                 TextColumn::make('district')->label('Район')->sortable(),
