@@ -1,0 +1,33 @@
+<?php
+
+use App\Http\Controllers\AdminController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\UserCabinetController;
+use App\Http\Controllers\OrderController;
+
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about', [AboutController::class, 'index'])->name('about');
+Route::get('/catalog/{category}', [CatalogController::class, 'index'])->name('catalog');
+Route::get('/contacts', [ContactController::class, 'index'])->name('contacts');
+
+// Пользовательский кабинет
+Route::middleware('auth')->group(function () {
+    Route::get('/cabinet', [UserCabinetController::class, 'index'])->name('cabinet');
+    Route::post('/order', [OrderController::class, 'store'])->name('order.store');
+});
+
+// Админ-панель
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
+    Route::get('/products', [AdminController::class, 'products'])->name('admin.products');
+    Route::post('/products', [AdminController::class, 'storeProduct'])->name('admin.products.store');
+    Route::get('/discounts', [AdminController::class, 'discounts'])->name('admin.discounts');
+    Route::post('/discounts', [AdminController::class, 'storeDiscount'])->name('admin.discounts.store');
+});
+
+Auth::routes();
