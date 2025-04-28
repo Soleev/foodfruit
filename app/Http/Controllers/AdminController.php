@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Order;
 use App\Models\Discount;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,10 +16,67 @@ class AdminController extends Controller
         $this->middleware('auth');
         $this->middleware('admin');
     }
+    // Список пользователей
+
     public function users()
     {
-        $users = User::where('role', 'user')->get();
-        return view('admin.users', compact('users'));
+        $users = User::all(); // Показываем всех пользователей
+        return view('admin.users', [
+            'title' => 'Покупатели',
+            'users' => $users
+        ]);
+    }
+    // Форма покупки товара для пользователя
+    public function buyProduct(User $user)
+    {
+        $products = Product::all();
+        return view('admin.buy-product', [
+            'title' => 'Купить товар для пользователя',
+            'user' => $user,
+            'products' => $products
+        ]);
+    }
+    // Сохранение покупки
+    public function storePurchase(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|array', // Массив выбранных товаров
+            'product_id.*' => 'exists:products,id', // Проверка, что каждый товар существует
+            'quantity' => 'required|array', // Массив количеств
+            'quantity.*' => 'integer|min:1', // Проверка, что количество — целое число >= 1
+        ]);
+
+        // Создаём заказ
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_price' => 0, // Временно 0, обновим ниже
+            'status' => 'pending',
+        ]);
+
+        // Подсчитываем общую стоимость и добавляем товары в заказ
+        $totalPrice = 0;
+        foreach ($validated['product_id'] as $index => $productId) {
+            $product = Product::findOrFail($productId);
+            $quantity = $validated['quantity'][$index];
+            $order->products()->attach($productId, ['quantity' => $quantity]);
+            $totalPrice += $product->price * $quantity;
+        }
+
+        // Обновляем общую стоимость заказа
+        $order->update(['total_price' => $totalPrice]);
+
+        return redirect()->route('admin.users')->with('success', 'Товары успешно куплены для пользователя.');
+    }
+
+    // История покупок пользователя
+    public function userOrders(User $user)
+    {
+        $orders = $user->orders()->with('products')->get();
+        return view('admin.user-orders', [
+            'title' => 'История покупок: ' . $user->name,
+            'user' => $user,
+            'orders' => $orders
+        ]);
     }
 
     public function storeUser(Request $request)
@@ -43,6 +101,51 @@ class AdminController extends Controller
     {
         $products = Product::all();
         return view('admin.products', compact('products'));
+    }
+    // Форма редактирования продукта
+    public function editProduct(Product $product)
+    {
+        return view('admin.products-edit', [
+            'title' => 'Редактировать продукт',
+            'product' => $product
+        ]);
+    }
+    // Обновление продукта
+    public function updateProduct(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'type' => 'required|in:products,fruits',
+            'image' => 'nullable|image|max:2048', // Максимум 2 МБ
+        ]);
+
+        // Если загружена новая картинка
+        if ($request->hasFile('image')) {
+            // Удаляем старую картинку, если она есть
+            if ($product->image) {
+                \Storage::disk('public')->delete($product->image);
+            }
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image'] = $path;
+        }
+
+        $product->update($validated);
+
+        return redirect()->route('admin.products')->with('success', 'Продукт успешно обновлён.');
+    }
+    // Удаление продукта
+    public function deleteProduct(Product $product)
+    {
+        // Удаляем картинку, если она есть
+        if ($product->image) {
+            \Storage::disk('public')->delete($product->image);
+        }
+
+        $product->delete();
+
+        return redirect()->route('admin.products')->with('success', 'Продукт успешно удалён.');
     }
 
     public function storeProduct(Request $request)

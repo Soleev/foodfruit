@@ -13,7 +13,8 @@
         <a class="navbar-brand" href="{{ url('/') }}">
             {{ config('app.name', 'FoodFruit') }}
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -26,7 +27,8 @@
                     <a class="nav-link" href="{{ route('about') }}">О нас</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="catalogDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="{{ route('catalog.categories') }}" id="catalogDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Каталог
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="catalogDropdown">
@@ -41,14 +43,22 @@
 
             <ul class="navbar-nav ms-auto">
                 @auth
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('cabinet') }}">Личный кабинет</a>
-                    </li>
                     @if(auth()->user()->isAdmin())
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.users') }}">Админ-панель</a>
+                            <a class="nav-link" href="{{ route('admin.users') }}">Покупатели</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.products') }}">Продукты</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.discounts') }}">Скидки</a>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('cabinet') }}">Личный кабинет</a>
                         </li>
                     @endif
+
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

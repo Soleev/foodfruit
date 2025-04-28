@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
+Route::get('/catalog', [CatalogController::class, 'categories'])->name('catalog.categories');
 Route::get('/catalog/{category}', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/contacts', [ContactController::class, 'index'])->name('contacts');
 
@@ -24,8 +25,16 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
+    Route::get('/users/{user}/buy', [AdminController::class, 'buyProduct'])->name('admin.users.buy');
+    Route::post('/users/{user}/buy', [AdminController::class, 'storePurchase'])->name('admin.users.storePurchase');
+    Route::get('/users/{user}/orders', [AdminController::class, 'userOrders'])->name('admin.users.orders');
+
     Route::get('/products', [AdminController::class, 'products'])->name('admin.products');
     Route::post('/products', [AdminController::class, 'storeProduct'])->name('admin.products.store');
+    Route::get('/products/{product}/edit', [AdminController::class, 'editProduct'])->name('admin.products.edit');
+    Route::put('/products/{product}', [AdminController::class, 'updateProduct'])->name('admin.products.update');
+    Route::delete('/products/{product}', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
+
     Route::get('/discounts', [AdminController::class, 'discounts'])->name('admin.discounts');
     Route::post('/discounts', [AdminController::class, 'storeDiscount'])->name('admin.discounts.store');
 });

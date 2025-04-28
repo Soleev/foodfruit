@@ -8,6 +8,9 @@ class ContactController extends Controller
 {
     public function index()
     {
-        return view('contacts');
+        return view('contacts', [
+            'title' => 'page title',
+            'text' => 'page content',
+        ]);
     }
 }

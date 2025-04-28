@@ -2,14 +2,13 @@
 
 @section('content')
     <div class="container">
-        <h1 class="mb-4">Управление товарами</h1>
+        <h1 class="mb-4">Управление продуктами</h1>
 
-        @if(session('success'))
-            <div class="alert alert-success" role="alert">
+        @if (session('success'))
+            <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
-
         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="mb-4">
             @csrf
             <div class="row">
@@ -55,23 +54,23 @@
             <button type="submit" class="btn btn-primary">Добавить товар</button>
         </form>
 
-        <table class="table table-bordered">
+        <table class="table">
             <thead>
             <tr>
                 <th>ID</th>
                 <th>Название</th>
-                <th>Описание</th>
+                <th>Тип</th>
                 <th>Цена</th>
-                <th>Категория</th>
+                <th>Действия</th>
                 <th>Изображение</th>
             </tr>
             </thead>
             <tbody>
-            @foreach ($products as $product)
+            @forelse ($products as $product)
                 <tr>
                     <td>{{ $product->id }}</td>
                     <td>{{ $product->name }}</td>
-                    <td>{{ $product->description }}</td>
+                    <td>{{ $product->type === 'products' ? 'Продукты' : 'Фрукты' }}</td>
                     <td>{{ number_format($product->price, 0, ',', ' ') }} сум</td>
                     <td>{{ ucfirst($product->category) }}</td>
                     <td>
@@ -79,8 +78,20 @@
                             <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" width="50">
                         @endif
                     </td>
+                    <td>
+                        <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-primary">Редактировать</a>
+                        <form action="{{ route('admin.products.delete', $product) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот продукт?')">Удалить</button>
+                        </form>
+                    </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5">Продуктов пока нет.</td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>
