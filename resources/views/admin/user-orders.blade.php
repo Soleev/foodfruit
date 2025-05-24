@@ -24,6 +24,7 @@
                             <th>Количество</th>
                             <th>Цена за единицу</th>
                             <th>Общая стоимость</th>
+
                         </tr>
                         </thead>
                         <tbody>
@@ -38,6 +39,7 @@
                         </tbody>
                     </table>
                     <p><strong>Итого:</strong> {{ number_format($order->total_price, 0, ',', ' ') }} сум</p>
+                    <a href="{{ route('admin.orders.edit', $order->id) }}" class="btn btn-sm btn-primary">Изменить</a>
                 </div>
             </div>
         @empty

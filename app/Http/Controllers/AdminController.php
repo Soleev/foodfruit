@@ -16,6 +16,7 @@ class AdminController extends Controller
         $this->middleware('auth');
         $this->middleware('admin');
     }
+
     // Список пользователей
 
     public function users()
@@ -26,12 +27,17 @@ class AdminController extends Controller
             'users' => $users
         ]);
     }
-
     public function orders()
     {
-        $orders = Order::with('user', 'products')->latest()->get(); // Загружаем связанные данные о пользователе и товарах
+        $orders = Order::with('user', 'products')
+            ->whereNull('deleted_at') // Показываем только активные
+            ->latest()
+            ->get();
+
         return view('admin.orders', compact('orders'));
     }
+
+
     public function editOrder(Order $order)
     {
         return view('admin.orders_edit', compact('order'));
@@ -51,6 +57,14 @@ class AdminController extends Controller
 
         return redirect()->route('admin.orders')->with('success', 'Статус заказа обновлен!');
     }
+    public function deleteOrder(Order $order)
+    {
+        $order->delete();
+
+        return redirect()->route('admin.orders')->with('success', 'Заказ удалён (мягко).');
+    }
+
+
     // Форма покупки товара для пользователя
     public function buyProduct(User $user)
     {
@@ -61,6 +75,7 @@ class AdminController extends Controller
             'products' => $products
         ]);
     }
+
     // Сохранение покупки
     public function storePurchase(Request $request, User $user)
     {
@@ -93,6 +108,7 @@ class AdminController extends Controller
 
         return redirect()->route('admin.users')->with('success', 'Товары успешно куплены для пользователя.');
     }
+
     // История покупок пользователя
     public function userOrders(User $user)
     {
@@ -124,9 +140,12 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::all();
+        // Показываем только те продукты, которые НЕ удалены
+        $products = Product::whereNull('deleted_at')->get();
         return view('admin.products', compact('products'));
+
     }
+
     // Форма редактирования продукта
     public function editProduct(Product $product)
     {
@@ -135,6 +154,7 @@ class AdminController extends Controller
             'product' => $product
         ]);
     }
+
     // Обновление продукта
     public function updateProduct(Request $request, Product $product)
     {
@@ -143,14 +163,12 @@ class AdminController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'type' => 'required|in:products,fruits',
-            'image' => 'nullable|image|max:2048', // Максимум 2 МБ
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        // Если загружена новая картинка
         if ($request->hasFile('image')) {
-            // Удаляем старую картинку, если она есть
             if ($product->image) {
-                \Storage::disk('public')->delete($product->image);
+                Storage::disk('public')->delete($product->image);
             }
             $path = $request->file('image')->store('products', 'public');
             $validated['image'] = $path;
@@ -160,7 +178,9 @@ class AdminController extends Controller
 
         return redirect()->route('admin.products')->with('success', 'Продукт успешно обновлён.');
     }
-    // Удаление продукта
+
+
+    // Мягкое удаление продукта
     public function deleteProduct(Product $product)
     {
         // Удаляем картинку, если она есть
@@ -168,10 +188,16 @@ class AdminController extends Controller
             \Storage::disk('public')->delete($product->image);
         }
 
-        $product->delete();
-
-        return redirect()->route('admin.products')->with('success', 'Продукт успешно удалён.');
+        $product->delete(); // soft delete
+        return redirect()->route('admin.products')->with('success', 'Продукт скрыт, но сохранён в истории заказов.');
     }
+
+    public function deletedProducts()
+    {
+        $products = Product::onlyTrashed()->get(); // только удалённые
+        return view('admin.deleted-products', compact('products'));
+    }
+
 
     public function storeProduct(Request $request)
     {

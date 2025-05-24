@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory; // Добавляем трейт
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Product extends Model
 {
-    use HasFactory; // Используем трейт
+    use HasFactory;
+    use SoftDeletes;
+
+    // Используем трейт
     protected $fillable = ['name', 'description', 'price', 'category', 'image'];
 
     public function orders()
@@ -17,6 +21,7 @@ class Product extends Model
             ->withPivot('quantity')
             ->withTimestamps();
     }
+
     public function discounts()
     {
         return $this->hasMany(Discount::class);

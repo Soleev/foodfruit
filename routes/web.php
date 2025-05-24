@@ -40,6 +40,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/orders', [AdminController::class, 'orders'])->name(name: 'admin.orders');
     Route::get('/orders/{order}/edit', [AdminController::class, 'editOrder'])->name(name: 'admin.orders.edit');
     Route::put('/orders/{order}', [AdminController::class, 'updateOrder'])->name(name: 'admin.orders.update');
+    Route::delete('/admin/orders/{order}', [AdminController::class, 'deleteOrder'])->name('admin.orders.delete');
+
 });
 
 Auth::routes();

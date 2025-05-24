@@ -68,6 +68,11 @@
                     <td>
                         <a href="{{ route('admin.orders.edit', $order->id) }}"
                            class="btn btn-sm btn-primary">Изменить</a>
+                        <form action="{{ route('admin.orders.delete', $order->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить заказ?')">Удалить</button>
+                        </form>
                     </td>
                 </tr>
             @endforeach
