@@ -37,6 +37,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     Route::get('/discounts', [AdminController::class, 'discounts'])->name('admin.discounts');
     Route::post('/discounts', [AdminController::class, 'storeDiscount'])->name('admin.discounts.store');
+    Route::get('/orders', [AdminController::class, 'orders'])->name(name: 'admin.orders');
+    Route::get('/orders/{order}/edit', [AdminController::class, 'editOrder'])->name(name: 'admin.orders.edit');
+    Route::put('/orders/{order}', [AdminController::class, 'updateOrder'])->name(name: 'admin.orders.update');
 });
 
 Auth::routes();

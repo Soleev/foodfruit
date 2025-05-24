@@ -52,6 +52,8 @@
                 <th>ID</th>
                 <th>Имя</th>
                 <th>Email</th>
+                <th>Оборот</th>
+                <th>Долг</th>
                 <th>Действия</th>
             </tr>
             </thead>
@@ -61,6 +63,9 @@
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
+                    <td>{{ number_format($user->orders->sum('total_price'), 0, ',', ' ') }} сум</td>
+                    <td>{{ number_format($user->debt, 0, ',', ' ') }} сум</td>
+
                     <td>
                         <a href="{{ route('admin.users.buy', $user) }}" class="btn btn-sm btn-primary">Купить товар</a>
                         <a href="{{ route('admin.users.orders', $user) }}" class="btn btn-sm btn-info">История

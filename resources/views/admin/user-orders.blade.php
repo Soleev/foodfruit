@@ -7,7 +7,14 @@
         @forelse ($orders as $order)
             <div class="card mb-3">
                 <div class="card-header">
-                    Заказ #{{ $order->id }} от {{ $order->created_at->format('d.m.Y H:i') }} ({{ $order->status }})
+                    Заказ #{{ $order->id }} от {{ $order->created_at->format('d.m.Y H:i') }}
+                    ({{ $order->delivery_status == 'new' ? 'Новый заказ' :
+                               ($order->delivery_status == 'to_deliver' ? 'К доставке' :
+                               ($order->delivery_status == 'delivered' ? 'Доставлено' : 'Неизвестно')) }})
+                    ({{ $order->payment_status == 'pending' ? 'Ожидает оплаты' :
+                               ($order->payment_status == 'prepaid' ? 'Оплачено (предоплата)' :
+                               ($order->payment_status == 'paid' ? 'Оплачено' :
+                               ($order->payment_status == 'credit' ? 'В кредит' : 'Неизвестно'))) }})
                 </div>
                 <div class="card-body">
                     <table class="table">

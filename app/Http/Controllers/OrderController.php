@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -48,13 +47,13 @@ class OrderController extends Controller
             }
         }
 
-        // Создаём заказ
+        // Создаём заказ с новыми статусами
         $order = Order::create([
             'user_id' => auth()->id(),
             'total_price' => $totalPrice,
-            'status' => 'pending',
         ]);
 
+        // Привязываем товары к заказу
         foreach ($quantities as $productId => $quantity) {
             if ($quantity > 0) {
                 $order->products()->attach($productId, ['quantity' => $quantity]);

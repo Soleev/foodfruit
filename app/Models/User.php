@@ -45,6 +45,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    // App\Models\User.php
+    public function getDebtAttribute()
+    {
+        return $this->orders()
+            ->whereIn('payment_status', ['pending', 'credit'])
+            ->sum('total_price');
+    }
+
 
     /**
      * Get the attributes that should be cast.

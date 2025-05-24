@@ -26,6 +26,31 @@ class AdminController extends Controller
             'users' => $users
         ]);
     }
+
+    public function orders()
+    {
+        $orders = Order::with('user', 'products')->latest()->get(); // Загружаем связанные данные о пользователе и товарах
+        return view('admin.orders', compact('orders'));
+    }
+    public function editOrder(Order $order)
+    {
+        return view('admin.orders_edit', compact('order'));
+    }
+
+    public function updateOrder(Request $request, Order $order)
+    {
+        $request->validate([
+            'delivery_status' => 'required|in:new,to_deliver,delivered',
+            'payment_status' => 'required|in:pending,prepaid,paid,credit',
+        ]);
+
+        $order->update([
+            'delivery_status' => $request->input('delivery_status'),
+            'payment_status' => $request->input('payment_status'),
+        ]);
+
+        return redirect()->route('admin.orders')->with('success', 'Статус заказа обновлен!');
+    }
     // Форма покупки товара для пользователя
     public function buyProduct(User $user)
     {
@@ -50,7 +75,6 @@ class AdminController extends Controller
         $order = Order::create([
             'user_id' => $user->id,
             'total_price' => 0, // Временно 0, обновим ниже
-            'status' => 'pending',
         ]);
 
         // Подсчитываем общую стоимость и добавляем товары в заказ
@@ -62,16 +86,17 @@ class AdminController extends Controller
             $totalPrice += $product->price * $quantity;
         }
 
-        // Обновляем общую стоимость заказа
-        $order->update(['total_price' => $totalPrice]);
+        // Обновляем общую стоимость заказа и устанавливаем начальные статусы
+        $order->update([
+            'total_price' => $totalPrice,
+        ]);
 
         return redirect()->route('admin.users')->with('success', 'Товары успешно куплены для пользователя.');
     }
-
     // История покупок пользователя
     public function userOrders(User $user)
     {
-        $orders = $user->orders()->with('products')->get();
+        $orders = $user->orders()->with('products')->latest()->get();
         return view('admin.user-orders', [
             'title' => 'История покупок: ' . $user->name,
             'user' => $user,

@@ -45,6 +45,9 @@
                 @auth
                     @if(auth()->user()->isAdmin())
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.orders') }}">Заказы</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{{ route('admin.users') }}">Покупатели</a>
                         </li>
                         <li class="nav-item">
