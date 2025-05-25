@@ -5,7 +5,7 @@
         <h1>Список заказов</h1>
         <div class="mb-3">
             <a href="{{ route('admin.orders.printAll') }}" target="_blank" class="btn btn-secondary">Печать всех заказов
-                для доставки <span class="badge badge-light">( {{ $toDeliverCount ?? 0 }} )</span></a>
+                для доставки <span class="badge text-bg-warning">( {{ $toDeliverCount ?? 0 }} )</span></a>
         </div>
         <table class="table table-striped">
             <thead>

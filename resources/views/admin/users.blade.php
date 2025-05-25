@@ -63,32 +63,38 @@
             <button type="submit" class="btn btn-primary">Добавить пользователя</button>
         </form>
 
-        <table class="table table-bordered">
+        <table class="table table-hover table-sm">
+            <caption>List of users</caption>
             <thead>
             <tr>
-                <th>ID</th>
-                <th>Имя</th>
-                <th>Email</th>
-                <th>Наименование магазина</th>
-                <th>Телефон</th>
-                <th>Адрес</th>
-                <th>Оборот</th>
-                <th>Долг</th>
-                <th>Оплатить долг</th>
-                <th>Действия</th>
+                <th scope="col">ID</th>
+                <th scope="col">Имя</th>
+                <th scope="col">Email</th>
+                <th scope="col">Наименование магазина</th>
+                <th scope="col">Телефон</th>
+                <th scope="col">Адрес</th>
+                <th scope="col">Оборот</th>
+                <th scope="col">Долг</th>
+                <th scope="col">Оплата</th>
+                <th scope="col">Действия</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody class="table-group-divider">
             @forelse ($users as $user)
                 <tr>
-                    <td>{{ $user->id }}</td>
+                    <th scope="row">{{ $user->id }}</th>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->store_name ?? '-' }}</td>
                     <td>{{ $user->phone ?? '-' }}</td>
                     <td>{{ $user->address ?? '-' }}</td>
                     <td>{{ number_format($user->orders->sum('total_price'), 0, ',', ' ') }} сум</td>
-                    <td>{{ number_format($user->debt, 0, ',', ' ') }} сум</td>
+
+                    @if($user->debt > 0)
+                        <td class="table-danger">{{ number_format($user->debt, 0, ',', ' ') }} сум</td>
+                    @else
+                        <td>-</td>
+                    @endif
                     <td>
                         @if($user->debt > 0)
                             <form action="{{ route('admin.users.payDebt', $user) }}" method="POST" class="d-inline">
@@ -97,7 +103,7 @@
                                 <button type="submit" class="btn btn-sm btn-success">Оплатить</button>
                             </form>
                         @else
-                            <span class="text-success">Долг погашен</span>
+                            <span class="text-success">-</span>
                         @endif
                     </td>
                     <td>
@@ -111,6 +117,18 @@
                 </tr>
             @endforelse
             </tbody>
+            <tfoot class="table-dark">
+            <th scope="row">{{$totalUsers}}</th>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="table-danger">{{ number_format($totalDebt, 0, ',', ' ') }} сум</td>
+            <td></td>
+            <td></td>
+            </tfoot>
         </table>
     </div>
 @endsection

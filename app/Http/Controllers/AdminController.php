@@ -22,9 +22,15 @@ class AdminController extends Controller
     public function users()
     {
         $users = User::all();
+        // Вычисляем общий долг всех пользователей
+        $totalDebt = $users->sum('debt');
+        $totalUsers = $users->count();
+
         return view('admin.users', [
             'title' => 'Покупатели',
-            'users' => $users
+            'users' => $users,
+            'totalDebt' => $totalDebt,
+            'totalUsers' => $totalUsers
         ]);
     }
 
