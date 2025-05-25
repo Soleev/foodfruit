@@ -46,4 +46,11 @@ class Order extends Model
         $paidAmount = $this->payments->sum('amount');
         return max(0, $this->total_price - $paidAmount);
     }
+    // Метод для расчета суммы без скидки
+    public function getOriginalTotalPriceAttribute()
+    {
+        return $this->products->sum(function ($product) {
+            return $product->price * $product->pivot->quantity;
+        });
+    }
 }

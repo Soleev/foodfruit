@@ -45,7 +45,12 @@
                             @endforeach
                         </ul>
                     </td>
-                    <td>{{ number_format($order->total_price, 0, ',', ' ') }} сум</td>
+                    <td>
+                        <p>Сумма без скидки: {{ number_format($order->original_total_price, 0, ',', ' ') }} сум</p>
+                        <p>Скидка: {{ $order->applied_discount_percentage ?? 0 }}%</p>
+                        <p>Сумма со скидкой: {{ number_format($order->total_price, 0, ',', ' ') }} сум</p>
+                    </td>
+
                     <td>
                         <span class="badge
                             {{ $order->delivery_status == 'new' ? 'bg-primary' :
