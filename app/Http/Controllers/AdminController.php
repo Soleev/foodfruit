@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Order;
-use App\Models\Discount;
+use App\Models\DiscountTier;
+use App\Models\DiscountTierHistory;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -18,25 +19,24 @@ class AdminController extends Controller
     }
 
     // Список пользователей
-
     public function users()
     {
-        $users = User::all(); // Показываем всех пользователей
+        $users = User::all();
         return view('admin.users', [
             'title' => 'Покупатели',
             'users' => $users
         ]);
     }
+
     public function orders()
     {
         $orders = Order::with('user', 'products')
-            ->whereNull('deleted_at') // Показываем только активные
+            ->whereNull('deleted_at')
             ->latest()
             ->get();
 
         return view('admin.orders', compact('orders'));
     }
-
 
     public function editOrder(Order $order)
     {
@@ -57,15 +57,13 @@ class AdminController extends Controller
 
         return redirect()->route('admin.orders')->with('success', 'Статус заказа обновлен!');
     }
+
     public function deleteOrder(Order $order)
     {
         $order->delete();
-
         return redirect()->route('admin.orders')->with('success', 'Заказ удалён (мягко).');
     }
 
-
-    // Форма покупки товара для пользователя
     public function buyProduct(User $user)
     {
         $products = Product::all();
@@ -76,23 +74,20 @@ class AdminController extends Controller
         ]);
     }
 
-    // Сохранение покупки
     public function storePurchase(Request $request, User $user)
     {
         $validated = $request->validate([
-            'product_id' => 'required|array', // Массив выбранных товаров
-            'product_id.*' => 'exists:products,id', // Проверка, что каждый товар существует
-            'quantity' => 'required|array', // Массив количеств
-            'quantity.*' => 'integer|min:1', // Проверка, что количество — целое число >= 1
+            'product_id' => 'required|array',
+            'product_id.*' => 'exists:products,id',
+            'quantity' => 'required|array',
+            'quantity.*' => 'integer|min:1',
         ]);
 
-        // Создаём заказ
         $order = Order::create([
             'user_id' => $user->id,
-            'total_price' => 0, // Временно 0, обновим ниже
+            'total_price' => 0,
         ]);
 
-        // Подсчитываем общую стоимость и добавляем товары в заказ
         $totalPrice = 0;
         foreach ($validated['product_id'] as $index => $productId) {
             $product = Product::findOrFail($productId);
@@ -101,15 +96,21 @@ class AdminController extends Controller
             $totalPrice += $product->price * $quantity;
         }
 
-        // Обновляем общую стоимость заказа и устанавливаем начальные статусы
+        // Применение скидки
+        $discount = DiscountTier::where('threshold_amount', '<=', $totalPrice)
+            ->orderBy('threshold_amount', 'desc')
+            ->first();
+        $discountPercentage = $discount ? $discount->discount_percentage : 0;
+        $finalPrice = $totalPrice * (1 - $discountPercentage / 100);
+
         $order->update([
-            'total_price' => $totalPrice,
+            'total_price' => $finalPrice,
+            'applied_discount_percentage' => $discountPercentage,
         ]);
 
         return redirect()->route('admin.users')->with('success', 'Товары успешно куплены для пользователя.');
     }
 
-    // История покупок пользователя
     public function userOrders(User $user)
     {
         $orders = $user->orders()->with('products')->latest()->get();
@@ -122,17 +123,22 @@ class AdminController extends Controller
 
     public function storeUser(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'store_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'password' => 'required|confirmed|min:8',
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user',
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'store_name' => $validated['store_name'],
+            'phone' => $validated['phone'],
+            'address' => $validated['address'],
+            'password' => bcrypt($validated['password']),
         ]);
 
         return redirect()->back()->with('success', 'Пользователь успешно добавлен.');
@@ -140,13 +146,10 @@ class AdminController extends Controller
 
     public function products()
     {
-        // Показываем только те продукты, которые НЕ удалены
         $products = Product::whereNull('deleted_at')->get();
         return view('admin.products', compact('products'));
-
     }
 
-    // Форма редактирования продукта
     public function editProduct(Product $product)
     {
         return view('admin.products-edit', [
@@ -155,7 +158,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // Обновление продукта
     public function updateProduct(Request $request, Product $product)
     {
         $validated = $request->validate([
@@ -175,29 +177,24 @@ class AdminController extends Controller
         }
 
         $product->update($validated);
-
         return redirect()->route('admin.products')->with('success', 'Продукт успешно обновлён.');
     }
 
-
-    // Мягкое удаление продукта
     public function deleteProduct(Product $product)
     {
-        // Удаляем картинку, если она есть
         if ($product->image) {
             \Storage::disk('public')->delete($product->image);
         }
 
-        $product->delete(); // soft delete
+        $product->delete();
         return redirect()->route('admin.products')->with('success', 'Продукт скрыт, но сохранён в истории заказов.');
     }
 
     public function deletedProducts()
     {
-        $products = Product::onlyTrashed()->get(); // только удалённые
+        $products = Product::onlyTrashed()->get();
         return view('admin.deleted-products', compact('products'));
     }
-
 
     public function storeProduct(Request $request)
     {
@@ -215,31 +212,71 @@ class AdminController extends Controller
         }
 
         Product::create($data);
-
         return redirect()->back()->with('success', 'Товар успешно добавлен.');
     }
 
     public function discounts()
     {
-        $users = User::where('role', 'user')->get();
-        $products = Product::all();
-        $discounts = Discount::with(['user', 'product'])->get();
-        return view('admin.discounts', compact('users', 'products', 'discounts'));
+        $discountTiers = DiscountTier::all();
+        $discountHistory = DiscountTierHistory::latest('action_at')->get();
+        return view('admin.discounts', compact('discountTiers', 'discountHistory'));
     }
 
     public function storeDiscount(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'product_id' => 'required|exists:products,id',
+        $validated = $request->validate([
+            'threshold_amount' => 'required|numeric|min:0',
             'discount_percentage' => 'required|numeric|min:0|max:100',
         ]);
 
-        Discount::updateOrCreate(
-            ['user_id' => $request->user_id, 'product_id' => $request->product_id],
-            ['discount_percentage' => $request->discount_percentage]
-        );
+        $discountTier = DiscountTier::create($validated);
 
-        return redirect()->back()->with('success', 'Скидка успешно установлена.');
+        DiscountTierHistory::create([
+            'discount_tier_id' => $discountTier->id,
+            'threshold_amount' => $discountTier->threshold_amount,
+            'discount_percentage' => $discountTier->discount_percentage,
+            'action' => 'created',
+            'action_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Скидка успешно добавлена.');
+    }
+
+    public function editDiscount(DiscountTier $discountTier)
+    {
+        return view('admin.discounts-edit', compact('discountTier'));
+    }
+
+    public function updateDiscount(Request $request, DiscountTier $discountTier)
+    {
+        $validated = $request->validate([
+            'threshold_amount' => 'required|numeric|min:0',
+            'discount_percentage' => 'required|numeric|min:0|max:100',
+        ]);
+
+        DiscountTierHistory::create([
+            'discount_tier_id' => $discountTier->id,
+            'threshold_amount' => $discountTier->threshold_amount,
+            'discount_percentage' => $discountTier->discount_percentage,
+            'action' => 'updated',
+            'action_at' => now(),
+        ]);
+
+        $discountTier->update($validated);
+        return redirect()->route('admin.discounts')->with('success', 'Скидка обновлена.');
+    }
+
+    public function deleteDiscount(DiscountTier $discountTier)
+    {
+        DiscountTierHistory::create([
+            'discount_tier_id' => $discountTier->id,
+            'threshold_amount' => $discountTier->threshold_amount,
+            'discount_percentage' => $discountTier->discount_percentage,
+            'action' => 'deleted',
+            'action_at' => now(),
+        ]);
+
+        $discountTier->delete();
+        return redirect()->route('admin.discounts')->with('success', 'Скидка удалена.');
     }
 }

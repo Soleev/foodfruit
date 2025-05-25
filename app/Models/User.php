@@ -18,9 +18,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name', 'email', 'password', 'role',
-    ];
+    protected $fillable = ['name', 'email', 'password', 'role', 'store_name', 'phone', 'address', 'debt'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -41,10 +39,12 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
     // App\Models\User.php
     public function getDebtAttribute()
     {
