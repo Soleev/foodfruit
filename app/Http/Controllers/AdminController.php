@@ -35,7 +35,13 @@ class AdminController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.orders', compact('orders'));
+        // Подсчет заказов со статусом 'to_deliver'
+        $toDeliverCount = Order::where('delivery_status', 'to_deliver')
+            ->whereNull('deleted_at')
+            ->count();
+
+        return view('admin.orders', compact('orders', 'toDeliverCount'));
+
     }
 
     public function editOrder(Order $order)

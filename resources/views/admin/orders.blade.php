@@ -4,7 +4,8 @@
     <div class="container">
         <h1>Список заказов</h1>
         <div class="mb-3">
-            <a href="{{ route('admin.orders.printAll') }}" target="_blank" class="btn btn-secondary">Печать всех заказов для доставки</a>
+            <a href="{{ route('admin.orders.printAll') }}" target="_blank" class="btn btn-secondary">Печать всех заказов
+                для доставки <span class="badge badge-light">( {{ $toDeliverCount ?? 0 }} )</span></a>
         </div>
         <table class="table table-striped">
             <thead>
@@ -74,16 +75,24 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ route('admin.orders.edit', $order->id) }}"
-                           class="btn btn-sm btn-primary">Изменить</a>
-                        @if($order->delivery_status == 'to_deliver')
-                            <a href="{{ route('admin.orders.print', $order->id) }}" target="_blank" class="btn btn-sm btn-info">Печать</a>
-                        @endif
-                        <form action="{{ route('admin.orders.delete', $order->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить заказ?')">Удалить</button>
-                        </form>
+                        <ul class="list-group">
+                            <a href="{{ route('admin.orders.edit', $order->id) }}" class="list-group-item list-group-item-action list-group-item-primary">Изменить</a>
+
+                            @if($order->delivery_status == 'to_deliver')
+                                <a href="{{ route('admin.orders.print', $order->id) }}" target="_blank"
+                                   class="list-group-item list-group-item-action list-group-item-dark">Печать</a>
+                            @endif
+
+                            <form action="{{ route('admin.orders.delete', $order->id) }}" method="POST"
+                                  style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="list-group-item list-group-item-action list-group-item-danger"
+                                        onclick="return confirm('Удалить заказ?')">Удалить
+                                </button>
+                            </form>
+
+                        </ul>
                     </td>
                 </tr>
             @endforeach
