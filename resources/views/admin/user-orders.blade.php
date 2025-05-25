@@ -20,22 +20,46 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>Товар</th>
-                            <th>Количество</th>
-                            <th>Цена за единицу</th>
-                            <th>Общая стоимость</th>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Товары</th>
+                            <th>Сумма</th>
+                            <th>Статус доставки</th>
+                            <th>Статус оплаты</th>
+                            <th>Действия</th>
 
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach ($order->products as $product)
+                        @forelse($orders as $order)
                             <tr>
-                                <td>{{ $product->name }}</td>
-                                <td>{{ $product->pivot->quantity }}</td>
-                                <td>{{ number_format($product->price, 0, ',', ' ') }} сум</td>
-                                <td>{{ number_format($product->price * $product->pivot->quantity, 0, ',', ' ') }} сум</td>
+                                <td>{{ $order->id }}</td>
+                                <td>{{ $order->created_at->format('d.m.Y H:i') }}</td>
+                                <td>
+                                    <ul>
+                                        @foreach($order->products as $product)
+                                            <li>{{ $product->name }} ({{ $product->pivot->quantity }} шт.)</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <p>Сумма: {{ number_format($order->total_price, 0, ',', ' ') }} сум</p>
+                                    <p>Оплачено: {{ number_format($order->total_price - $order->remaining_debt, 0, ',', ' ') }} сум</p>
+                                    <p>Остаток: {{ number_format($order->remaining_debt, 0, ',', ' ') }} сум</p>
+                                </td>
+                                <td>{{ $order->delivery_status }}</td>
+                                <td>{{ $order->payment_status }}</td>
+                                <td>
+                                    @if($order->remaining_debt > 0)
+                                        <a href="{{ route('admin.orders.pay', [$user, $order]) }}" class="btn btn-sm btn-success">Оплатить</a>
+                                    @endif
+                                </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="7">Заказов пока нет.</td>
+                            </tr>
+                        @endforelse
                         </tbody>
                     </table>
                     <p><strong>Итого:</strong> {{ number_format($order->total_price, 0, ',', ' ') }} сум</p>

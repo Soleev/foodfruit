@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('order_payments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 10, 2); // Сумма платежа
+            $table->timestamp('payment_date')->useCurrent();
+            $table->string('payment_method')->nullable(); // Метод оплаты (например, наличные, карта)
             $table->timestamps();
         });
     }

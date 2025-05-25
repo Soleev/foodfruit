@@ -33,6 +33,17 @@ class Order extends Model
     {
         return $this->belongsToMany(Product::class)
             ->withPivot('quantity')
-            ->withTrashed(); // ← ВАЖНО: включает удалённые продукты
+            ->withTrashed() // ← ВАЖНО: включает удалённые продукты
+            ->withTimestamps();
+    }
+    public function payments()
+    {
+        return $this->hasMany(OrderPayment::class);
+    }
+    // Оставшийся долг по заказу
+    public function getRemainingDebtAttribute()
+    {
+        $paidAmount = $this->payments->sum('amount');
+        return max(0, $this->total_price - $paidAmount);
     }
 }

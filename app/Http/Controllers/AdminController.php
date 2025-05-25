@@ -279,4 +279,72 @@ class AdminController extends Controller
         $discountTier->delete();
         return redirect()->route('admin.discounts')->with('success', 'Скидка удалена.');
     }
+    public function payOrder(User $user, Order $order)
+    {
+        return view('admin.pay-order', [
+            'title' => 'Оплата заказа #' . $order->id,
+            'user' => $user,
+            'order' => $order,
+        ]);
+    }
+    public function storePayment(Request $request, User $user, Order $order)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0|max:' . $order->remaining_debt,
+            'payment_method' => 'nullable|string|max:255',
+        ]);
+
+        $order->payments()->create([
+            'amount' => $validated['amount'],
+            'payment_method' => $validated['payment_method'],
+            'payment_date' => now(),
+        ]);
+
+        // Обновляем статус оплаты заказа
+        $remainingDebt = $order->remaining_debt;
+        if ($remainingDebt == 0) {
+            $order->update(['payment_status' => 'paid']);
+        } elseif ($remainingDebt < $order->total_price) {
+            $order->update(['payment_status' => 'credit']); // Частично оплачен
+        }
+
+        return redirect()->route('admin.users.orders', $user->id)
+            ->with('success', 'Платеж на сумму ' . number_format($validated['amount'], 0, ',', ' ') . ' сум успешно внесен.');
+    }
+    public function payDebt(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0|max:' . $user->debt,
+        ]);
+
+        $remainingAmount = $validated['amount'];
+        $orders = $user->orders()
+            ->whereIn('payment_status', ['pending', 'credit'])
+            ->orderBy('created_at')
+            ->get();
+
+        foreach ($orders as $order) {
+            if ($remainingAmount <= 0) break;
+
+            $debt = $order->remaining_debt;
+            if ($debt > 0) {
+                $paymentAmount = min($remainingAmount, $debt);
+                $order->payments()->create([
+                    'amount' => $paymentAmount,
+                    'payment_date' => now(),
+                ]);
+
+                $remainingAmount -= $paymentAmount;
+
+                // Обновляем статус заказа
+                $newDebt = $order->remaining_debt;
+                if ($newDebt == 0) {
+                    $order->update(['payment_status' => 'paid']);
+                }
+            }
+        }
+
+        return redirect()->route('admin.users')
+            ->with('success', 'Платеж на сумму ' . number_format($validated['amount'], 0, ',', ' ') . ' сум успешно внесен.');
+    }
 }

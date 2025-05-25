@@ -74,6 +74,7 @@
                 <th>Адрес</th>
                 <th>Оборот</th>
                 <th>Долг</th>
+                <th>Оплатить долг</th>
                 <th>Действия</th>
             </tr>
             </thead>
@@ -89,13 +90,24 @@
                     <td>{{ number_format($user->orders->sum('total_price'), 0, ',', ' ') }} сум</td>
                     <td>{{ number_format($user->debt, 0, ',', ' ') }} сум</td>
                     <td>
+                        @if($user->debt > 0)
+                            <form action="{{ route('admin.users.payDebt', $user) }}" method="POST" class="d-inline">
+                                @csrf
+                                <input type="number" name="amount" class="form-control form-control-sm d-inline-block w-auto" min="0" max="{{ $user->debt }}" placeholder="Сумма" required>
+                                <button type="submit" class="btn btn-sm btn-success">Оплатить</button>
+                            </form>
+                        @else
+                            <span class="text-success">Долг погашен</span>
+                        @endif
+                    </td>
+                    <td>
                         <a href="{{ route('admin.users.buy', $user) }}" class="btn btn-sm btn-primary">Купить товар</a>
                         <a href="{{ route('admin.users.orders', $user) }}" class="btn btn-sm btn-info">История покупок</a>
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9">Пользователей пока нет.</td>
+                    <td colspan="10">Пользователей пока нет.</td>
                 </tr>
             @endforelse
             </tbody>

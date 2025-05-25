@@ -43,6 +43,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/discounts/{discountTier}/edit', [AdminController::class, 'editDiscount'])->name('admin.discounts.edit');
     Route::put('/discounts/{discountTier}', [AdminController::class, 'updateDiscount'])->name('admin.discounts.update');
     Route::delete('/discounts/{discountTier}', [AdminController::class, 'deleteDiscount'])->name('admin.discounts.delete');
+    Route::get('/users/{user}/orders/{order}/pay', [AdminController::class, 'payOrder'])->name('admin.orders.pay');
+    Route::post('/users/{user}/orders/{order}/pay', [AdminController::class, 'storePayment'])->name('admin.orders.storePayment');
+    Route::post('/users/{user}/pay-debt', [AdminController::class, 'payDebt'])->name('admin.users.payDebt');
 
 });
 

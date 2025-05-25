@@ -50,9 +50,9 @@ class User extends Authenticatable
     {
         return $this->orders()
             ->whereIn('payment_status', ['pending', 'credit'])
-            ->sum('total_price');
+            ->get()
+            ->sum('remaining_debt');
     }
-
 
     /**
      * Get the attributes that should be cast.
