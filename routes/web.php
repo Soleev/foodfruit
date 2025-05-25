@@ -46,6 +46,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/users/{user}/orders/{order}/pay', [AdminController::class, 'payOrder'])->name('admin.orders.pay');
     Route::post('/users/{user}/orders/{order}/pay', [AdminController::class, 'storePayment'])->name('admin.orders.storePayment');
     Route::post('/users/{user}/pay-debt', [AdminController::class, 'payDebt'])->name('admin.users.payDebt');
+    Route::get('/orders/print', [AdminController::class, 'printOrders'])->name('admin.orders.printAll');
+    Route::get('/orders/{order}/print', [AdminController::class, 'printOrder'])->name('admin.orders.print');
 
 });
 

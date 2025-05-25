@@ -347,4 +347,23 @@ class AdminController extends Controller
         return redirect()->route('admin.users')
             ->with('success', 'Платеж на сумму ' . number_format($validated['amount'], 0, ',', ' ') . ' сум успешно внесен.');
     }
+    public function printOrders()
+    {
+        $orders = Order::with('user', 'products')
+            ->where('delivery_status', 'to_deliver')
+            ->whereNull('deleted_at')
+            ->latest()
+            ->get();
+
+        return view('admin.orders_print', compact('orders'));
+    }
+
+    public function printOrder(Order $order)
+    {
+        if ($order->delivery_status !== 'to_deliver') {
+            return redirect()->route('admin.orders')->with('error', 'Этот заказ не готов к доставке.');
+        }
+
+        return view('admin.orders_print', ['orders' => collect([$order])]);
+    }
 }

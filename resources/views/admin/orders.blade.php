@@ -3,6 +3,9 @@
 @section('content')
     <div class="container">
         <h1>Список заказов</h1>
+        <div class="mb-3">
+            <a href="{{ route('admin.orders.printAll') }}" target="_blank" class="btn btn-secondary">Печать всех заказов для доставки</a>
+        </div>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -68,6 +71,9 @@
                     <td>
                         <a href="{{ route('admin.orders.edit', $order->id) }}"
                            class="btn btn-sm btn-primary">Изменить</a>
+                        @if($order->delivery_status == 'to_deliver')
+                            <a href="{{ route('admin.orders.print', $order->id) }}" target="_blank" class="btn btn-sm btn-info">Печать</a>
+                        @endif
                         <form action="{{ route('admin.orders.delete', $order->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
